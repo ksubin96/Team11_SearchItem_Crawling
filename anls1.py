@@ -1,207 +1,221 @@
-def anls() : #미완성
-import pandas as pd
+import data_management as dm
 import re
-import seaborn as sns #데이터 시각화 위한 seaaborn
-import matplotlib.pyplot as plt
-from matplotlib import font_manager, rc
-import matplotlib
+import pandas as pd
+import seaborn as sns
 
-#한글 형태소 분석기인 konlpy사용
-#이때 konlpy에는 hannanum, kommoran, kkma, twitter이 있는데 해당 분석에서는 kkma사용
 from konlpy.tag import Kkma
 from konlpy.tag import Mecab
 from konlpy.tag import Twitter
-#apply lambda사용
-from konlpy.tag import Komoran
 
-youtuber_data = pd.read_cs('xxx.csv',encoding = 'utf-8') # 임의로 xxx로 정해둠
-youtuber_data.head() # 상위5개의 데이터만 출력된다
+def func1(url, password):
+    youtuber_csv_data = dm.GetData(url, password)
+    youtuber_data = list(youtuber_csv_data)
+    title = []
+    view = []
+    like = []
+    unlike = []
+    videolength = []
+    comment = []
+    date = []
 
-view_ls = []
-like_ls = []
-unlike_ls = []
-comment_ls = []
-date_ls = []
-videotime_ls = []
+    for i in range(len(youtuber_data)):
+        title.append(youtuber_data[i][1])
+        view.append(youtuber_data[i][2])
+        like.append(youtuber_data[i][3])
+        unlike.append(youtuber_data[i][4])
+        videolength.append(youtuber_data[i][5])
+        comment.append(youtuber_data[i][6])
+        date.append(youtuber_data[i][7])
 
-# a는 첫번째 자리 like
-for i in range(len(youtuber_data)):# iloc은 loc 처럼 index 이름, 열 이름을 사용하는 것이 아니라 몇 번째 행인지, 몇 번째 열인지 지정을 하여 숫자로 나타내주어야함. 기존의 파이썬 범위 지정과 마찬가지로 마지막 숫자의 행과 열은 추출 X
-    if '천' in youtuber_data['like'].iloc[i]: #데이터프레임명.iloc[시작 행:끝 행,시작 열: 끝 열]
-        a = ''.join(re.findall('[0-9]', youtuber_data['like'].iloc[i])) #한자리 수 이상을 찾아라 0~9
-        if len(a) == 2:
-            b = a + '00'
-        else:
-            b = a + '000'
-    elif '만' in youtuber_data['like'].iloc[i]:
-        b = ''.join(re.findall('[0-9]', youtuber_data['like'].iloc[i])) + '000' # 한자리 수 이상을 찾아라
-    else:
-        b = youtuber_data['like'].iloc[i]
-    like_ls.append(b)
+    print(youtuber_data[0])  # 0행 출력
 
-## aa는 첫번째 자리 unlike
-    if '천' in youtuber_data['unlike'].iloc[i]:
-        aa = ''.join(re.findall('[0-9]', youtuber_data['unlike'].iloc[i])) #한자리 수 이상을 찾아라
-        if len(a) == 2:
-            bb = aa + '00'
-        else:
-            bb = aa + '000'
-    elif '만' in youtuber_data['unlike'].iloc[i]:
-        bb = ''.join(re.findall('[0-9]', youtuber_data['unlike'].iloc[i])) + '000' #한자리 수 이상을 찾아라
-    else:
-        bb = youtuber_data['unlike'].iloc[i]
-    unlike_ls.append(bb)
+    video_info = pd.DataFrame({'title': [],
+                               'view': [],
+                               'like': [],
+                               'unlike': [],
+                               'comment': [],
+                               'date': []})
 
-    view0 = ''.join(re.findall('[0-9]', youtuber_data['view'].iloc[i]))
-    view_ls.append(view0)
+    insert_data = pd.DataFrame({'title': title,
+                                'view': view,
+                                'like': like,
+                                'unlike': unlike,
+                                'comment': comment,
+                                'date': date})
 
-    comment0 = ''.join(re.findall('[0-9]', youtuber_data['comment'].iloc[i]))
-    comment_ls.append(comment0)
+    video_info = video_info.append(insert_data)
+    video_info.index = range(len(video_info))
 
-    date0 = ''.join(re.findall('[.0-9]', youtuber_data['date'].iloc[i]))
-    date_ls.append(date0[:-1])
+    like_ls = []
+    view_ls = []
+    unlike_ls = []
+    comment_ls = []
+    date_ls = []
 
-    videotime0 = ''.join(re.findall('[.0-9]', youtuber_data['videotime'].iloc[i]))
-    videotime_ls.append(videotime0[:-1])
-
-youtuber_data['like'] = like_ls
-youtuber_data['unlike'] = unlike_ls
-youtuber_data['view'] = view_ls
-youtuber_data['comment'] = comment_ls
-youtuber_data['date'] = date_ls
-youtuber_data['videotime'] = videotime_ls
-
-#조회수 평균 구하고, 평균 조회수 까지 걸리는 시간 구함 그리고 그것을 걸린 날짜로 나누면 일자별 조회수 증가량 알 수 있음
-
-youtuber_data['view'] = youtuber_data['view'].astype('float64') #실수형으로 형변환
-youtuber_data['view'].mean() # 평균을 구함    xxx.xxxxxx 이런식으로 나올것
-
-#상관분석
-youtuber_data2 = youtuber_data[youtuber_data['like'] != '좋아요']
-youtuber_data2 = youtuber_data2[youtuber_data2['comment']!='']
-
-youtuber_data2['view'] = youtuber_data2['view'].astype('float64')
-youtuber_data2['like'] = youtuber_data2['like'].astype('float64')
-youtuber_data2['unlike'] = youtuber_data2['unlike'].astype('float64')
-youtuber_data2['comment'] = youtuber_data2['comment'].astype('float64')
-
-#corr() 상관분석
-youtuber_data2[['view','like','comment']].corr()    #	     view	      like	    comment
-                                                    #view	1.000000	0.813429	0.341466
-                                                    #like	0.813429	1.000000	0.615822
-                                                    #comment	0.341466	0.615822	1.000000
-
-#sns.heatmap(heat,annot=True) heat install이 안됨  나중에 다시.
-#이모티콘 제거
-emoji_pattern = re.compile("["
-        u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                           "]+", flags=re.UNICODE)
-
-#분석에 어긋나는 불용어구 제외 (특수문자, 의성어)
-han = re.compile(r'[ㄱ-ㅎㅏ-ㅣ!?~,".\n\r#\ufeff\u200d]')
-
-#제목
-title_ls = []
-for i in range(len(youtuber_data)):
-    a = re.sub(emoji_pattern, '', youtuber_data['title'].iloc[i])
-
-    b = re.sub(han, '', a)
-
-    title_ls.append(b)
-
-youtuber_data['title'] = title_ls
-
-twitter = Twitter()
-kkma = Kkma()
-
-#영상제목 토큰화 하는 과정
-noun_final = []
-for text in range(len(youtuber_data)):
-    noun0=kkma.pos(youtuber_data['title'].iloc[text])
-    noun=[]
-    for i,j in noun0:
-        if j=='NNG': #NNG는 일반 명사. VA는 형용사
-           # if i == '테스터' or i == '훈': #이 부분 수정
-                pass
+    for i in range(len(video_info)):
+        if '천' in video_info['like'].iloc[i]:
+            a = ''.join(re.findall('[0-9]', video_info['like'].iloc[i]))
+            if len(a) == 2:
+                b = a + '00'
             else:
-                noun.append(i)
-    noun_final.append(noun)
-youtuber_data['token'] = noun_final
-
-#토큰화 작업을 거친 뒤에 단어가 하나인 것은 제외하기
-noun_ls = []
-for i in range(len(youtuber_data)):
-    noun_ls0=[]
-    for j in range(len(youtuber_data['token'].iloc[i])):
-        if len(youtuber_data['token'].iloc[i][j]) == 1:
-            pass
+                b = a + '000'
+        elif '만' in video_info['like'].iloc[i]:
+            b = ''.join(re.findall('[0-9]', video_info['like'].iloc[i])) + '000'
         else:
-            noun_ls0.append(youtuber_data['token'].iloc[i][j])
-    noun_ls.append(list(set(noun_ls0))) #중복제거
+            b = video_info['like'].iloc[i]
+        like_ls.append(b)
 
-youtuber_data['token2'] = noun_ls
+        if '천' in video_info['unlike'].iloc[i]:
+            aa = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i]))
+            if len(a) == 2:
+                bb = aa + '00'
+            else:
+                bb = aa + '000'
+        elif '만' in video_info['unlike'].iloc[i]:
+            bb = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i])) + '000'
+        else:
+            bb = video_info['unlike'].iloc[i]
+        unlike_ls.append(bb)
 
-youtuber_data
+        view0 = ''.join(re.findall('[0-9]', video_info['view'].iloc[i]))
+        view_ls.append(view0)
+
+        comment0 = ''.join(re.findall('[0-9]', video_info['comment'].iloc[i]))
+        comment_ls.append(comment0)
+
+        date0 = ''.join(re.findall('[.0-9]', video_info['date'].iloc[i]))
+        date_ls.append(date0[:-1])
+
+    video_info['like'] = like_ls
+    video_info['view'] = view_ls
+    video_info['comment'] = comment_ls
+    video_info['date'] = date_ls
+    video_info['unlike'] = unlike_ls
+
+    video_info2 = video_info[video_info['like'] != '좋아요']
+    video_info2 = video_info2[video_info2['comment'] != '']
+    video_info2['view'] = video_info2['view'].astype('float64')
+    video_info2['like'] = video_info2['like'].astype('float64')
+    video_info2['unlike'] = video_info2['unlike'].astype('float64')
+    video_info2['comment'] = video_info2['comment'].astype('float64')
+
+    video_info2[['view', 'like', 'comment']].corr()
+    print(video_info2[['view', 'like', 'comment']].corr())  # 상관분석 표... 조회수 좋아요 댓글의 상관관계를 보여준다
+    # 영상 길이는 실수 형태로 변경이 되지 않아 4x4로 표현 불가 13:24 이런 식이라서..
+    heat = video_info2[['view', 'like', 'comment']].corr()
+    sns.heatmap(heat, annot=True)  # 파이참으로는 안보입니다
 
 
-# 각 키워드를 기준으로 조회수 정렬하기
-token_df = pd.DataFrame({'token': []})
-for i in range(len(youtuber_data)):
-    insert_data = pd.DataFrame({'token': youtuber_data['token2'].iloc[i]})
-    insert_data['view'] = youtuber_data['view'].iloc[i]
 
-    token_df = token_df.append(insert_data)
 
-token_df2 = token_df.groupby('token')['view'].sum().reset_index()  # 키워드별 조회수 합
-token_df2['count'] = token_df.groupby(['token']).count().reset_index()['view'].tolist()  # 각 키워드의 갯수
-# 키워드별 조회수의합 / 갯수 - 동등하게 만들어야 하기 때문에
-view_count = []
-for i in range(len(token_df2)):
-    a = token_df2['view'].iloc[i] / token_df2['count'].iloc[i]
-    view_count.append(a)
-token_df2['view_count'] = view_count
 
-#단어별 조회수
-token_df = pd.DataFrame({'token': []})
-for i in range(len(youtuber_data)):
-    insert_data = pd.DataFrame({'token': youtuber_data['token2'].iloc[i]})
-    insert_data['view'] = youtuber_data['view'].iloc[i]
+def func2(url, password):
+    youtuber_csv_data = dm.GetData(url, password)
+    youtuber_data = list(youtuber_csv_data)
+    title = []
+    view = []
+    like = []
+    unlike = []
+    videolength = []
+    comment = []
+    date = []
 
-    token_df = token_df.append(insert_data)
+    for i in range(len(youtuber_data)):
+        title.append(youtuber_data[i][1])
+        view.append(youtuber_data[i][2])
+        like.append(youtuber_data[i][3])
+        unlike.append(youtuber_data[i][4])
+        videolength.append(youtuber_data[i][5])
+        comment.append(youtuber_data[i][6])
+        date.append(youtuber_data[i][7])
 
-token_df['view'] = token_df['view'].astype('float64')
-token_df2 = token_df.groupby('token')['view'].sum().reset_index()
-token_df2['count'] = token_df.groupby(['token']).count().reset_index()['view'].tolist()
-view_count = []
-for i in range(len(token_df2)):
-    a = token_df2['view'].iloc[i]/token_df2['count'].iloc[i]
-    view_count.append(a)
-token_df2['view_count'] = view_count
-token_df2.sort_values(by='count',ascending=False).head(15)
-token_df2.sort_values(by='view',ascending=False).head(20)
-token_df2.sort_values(by='view').head(20)
-token_df2.sort_values(by='view_count',ascending=False).head(15)
-token_df2.sort_values(by='view_count').head(15)
+    video_info = pd.DataFrame({'title': [],
+                               'view': [],
+                               'like': [],
+                               'unlike': [],
+                               'comment': [],
+                               'date': []})
 
-#키워드별 좋아요
-token_df = pd.DataFrame({'token': []})
-for i in range(len(youtuber_data)):
-    insert_data = pd.DataFrame({'token': youtuber_data['token2'].iloc[i]})
-    insert_data['like'] = youtuber_data['like'].iloc[i]
+    insert_data = pd.DataFrame({'title': title,
+                                'view': view,
+                                'like': like,
+                                'unlike': unlike,
+                                'comment': comment,
+                                'date': date})
 
-    token_df = token_df.append(insert_data)
+    video_info = video_info.append(insert_data)
+    video_info.index = range(len(video_info))
 
-token_df = token_df[token_df['like']!='좋아요']
-token_df['like'] = token_df['like'].astype('float64')
-token_df2 = token_df.groupby('token')['like'].sum().reset_index()
-token_df2['count'] = token_df.groupby(['token']).count().reset_index()['like'].tolist()
-view_count = []
-for i in range(len(token_df2)):
-    a = token_df2['like'].iloc[i]/token_df2['count'].iloc[i]
-    view_count.append(a)
-token_df2['like_count'] = view_count
+    like_ls = []
+    view_ls = []
+    unlike_ls = []
+    comment_ls = []
+    date_ls = []
 
-token_df2.sort_values(by='like_count',ascending=False).head(15)
-token_df2.sort_values(by='like_count').head(15)
+    video_info['like'] = like_ls
+    video_info['view'] = view_ls
+    video_info['comment'] = comment_ls
+    video_info['date'] = date_ls
+    video_info['unlike'] = unlike_ls
+
+
+    # 이모티콘 제거
+    emoji_pattern = re.compile("["
+                               u"\U0001F600-\U0001F64F"  # emoticons
+                               u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                               u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                               u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                               "]+", flags=re.UNICODE)
+
+    # 분석에 어긋나는 불용어구 제외 (특수문자, 의성어)
+    han = re.compile(r'[ㄱ-ㅎㅏ-ㅣ!?~,".\n\r#\ufeff\u200d]')
+
+    title_ls = []
+    for i in range(len(video_info)):
+        a = re.sub(emoji_pattern, '', video_info['title'].iloc[i])
+
+        b = re.sub(han, '', a)
+
+        title_ls.append(b)
+
+    video_info['title'] = title_ls
+
+    twitter = Twitter()
+    #kkma = Kkma()
+
+    # 영상제목 토큰화 하는 과정
+    noun_final = []
+    for text in range(len(video_info)):
+        noun0 = twitter.pos(video_info['title'].iloc[text])
+        noun = []
+        for i, j in noun0:
+            if j == 'NNG':
+                if i == '뽀' or i == '블리':
+                    pass
+                else:
+                    noun.append(i)
+        noun_final.append(noun)
+    video_info['token'] = noun_final
+
+    token_df = pd.DataFrame({'token': []})
+    for i in range(len(video_info)):
+        insert_data = pd.DataFrame({'token': video_info['token2'].iloc[i]})
+        insert_data['view'] = video_info['view'].iloc[i]
+
+        token_df = token_df.append(insert_data)
+
+    token_df['view'] = token_df['view'].astype('float64')
+    token_df2 = token_df.groupby('token')['view'].sum().reset_index()
+    token_df2['count'] = token_df.groupby(['token']).count().reset_index()['view'].tolist()
+
+    view_count = []
+    for i in range(len(token_df2)):
+        a = token_df2['view'].iloc[i] / token_df2['count'].iloc[i]
+        view_count.append(a)
+    token_df2['view_count'] = view_count
+
+    token_df2.sort_values(by='count', ascending=False).head(15)
+    token_df2.sort_values(by='view', ascending=False).head(20)
+    token_df2.sort_values(by='view').head(20)
+    token_df2.sort_values(by='view_count', ascending=False).head(15)
+    token_df2.sort_values(by='view_count').head(15)
