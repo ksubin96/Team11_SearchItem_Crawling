@@ -8,6 +8,8 @@ from konlpy.tag import Mecab
 from konlpy.tag import Twitter
 
 def func1(url, password):
+
+
     youtuber_csv_data = dm.GetData(url, password)
     youtuber_data = list(youtuber_csv_data)
     title = []
@@ -129,6 +131,8 @@ def func2(url, password):
         comment.append(youtuber_data[i][6])
         date.append(youtuber_data[i][7])
 
+    #print(youtuber_data[0])  # 0행 출력
+
     video_info = pd.DataFrame({'title': [],
                                'view': [],
                                'like': [],
@@ -152,12 +156,46 @@ def func2(url, password):
     comment_ls = []
     date_ls = []
 
+
+    for i in range(len(video_info)):
+        if '천' in video_info['like'].iloc[i]:
+            a = ''.join(re.findall('[0-9]', video_info['like'].iloc[i]))
+            if len(a) == 2:
+                b = a + '00'
+            else:
+                b = a + '000'
+        elif '만' in video_info['like'].iloc[i]:
+            b = ''.join(re.findall('[0-9]', video_info['like'].iloc[i])) + '000'
+        else:
+            b = video_info['like'].iloc[i]
+        like_ls.append(b)
+
+        if '천' in video_info['unlike'].iloc[i]:
+            aa = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i]))
+            if len(a) == 2:
+                bb = aa + '00'
+            else:
+                bb = aa + '000'
+        elif '만' in video_info['unlike'].iloc[i]:
+            bb = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i])) + '000'
+        else:
+            bb = video_info['unlike'].iloc[i]
+        unlike_ls.append(bb)
+
+        view0 = ''.join(re.findall('[0-9]', video_info['view'].iloc[i]))
+        view_ls.append(view0)
+
+        comment0 = ''.join(re.findall('[0-9]', video_info['comment'].iloc[i]))
+        comment_ls.append(comment0)
+
+        date0 = ''.join(re.findall('[.0-9]', video_info['date'].iloc[i]))
+        date_ls.append(date0[:-1])
+
     video_info['like'] = like_ls
     video_info['view'] = view_ls
     video_info['comment'] = comment_ls
     video_info['date'] = date_ls
     video_info['unlike'] = unlike_ls
-
 
     # 이모티콘 제거
     emoji_pattern = re.compile("["
@@ -180,17 +218,18 @@ def func2(url, password):
 
     video_info['title'] = title_ls
 
-    twitter = Twitter()
-    #kkma = Kkma()
+    #twitter = Twitter()
+    kkma = Kkma()
 
     # 영상제목 토큰화 하는 과정
     noun_final = []
     for text in range(len(video_info)):
-        noun0 = twitter.pos(video_info['title'].iloc[text])
+        noun0 = kkma.pos(video_info['title'].iloc[text])
         noun = []
+
         for i, j in noun0:
             if j == 'NNG':
-                if i == '뽀' or i == '블리':
+                if i == '':
                     pass
                 else:
                     noun.append(i)
