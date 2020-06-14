@@ -203,7 +203,7 @@ def newDB(pw):
     cur = con.cursor()
     try :
         cur.execute("CREATE DATABASE youtuberDB")
-        con = pymysql.connect(host='127.0.0.1', user='root', password='11whzlqhem', database='youtuberDB', charset='utf8mb4')
+        con = pymysql.connect(host='127.0.0.1', user='root', password=pw, database='youtuberDB', charset='utf8mb4')
         cur = con.cursor()
         cur.execute("CREATE TABLE youtubers (url VARCHAR(33), name VARCHAR(80))")
     except : None
@@ -235,6 +235,13 @@ def PrintTable(pw, ip='127.0.0.1') :
 # 이 함수는 없어도 딱히 상관없다.
 def GetUpdateData() :
     return None
+
+
+
+
+
+
+
 
 
 # 이하 내용은 일종의 더미데이터 (오류 테스트 용)
@@ -402,5 +409,3 @@ def testDB2() :
     con.close()
 # testDB2()
 
-
-    con.close()
