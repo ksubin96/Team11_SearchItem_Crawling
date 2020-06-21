@@ -112,21 +112,27 @@ class AnlsMethod :
         Result = Frame(frame_Result, width=0, height=0, bg='Orange')
         Result.pack()
         if self.name == '영상 별 상관관계':
-            Label(Result, text=da.videos_corr(dm.GetData(url, con)), font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
+            da.videos_corr(dm.GetData(url, con)) # 변경된 부분
+            vc = PhotoImage(file = "video_corr.png") # 변경된 부분
+            label = Label(Result, image = vc) # 변경된 부분
+            label.image = vc # 변경된 부분
+            label.pack() # 변경된 부분
         elif self.name == '영상 제목 정렬':
             z2= da.title_sort(dm.GetData(url, con))
             print(type(z2))
             Label(Result, text='영상 제목 정렬', font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
         elif self.name == '댓글 시각화':
-            z3= da.comment_freq(dm.GetData(url, con))
-            print(type(z3))
+            da.comment_freq(dm.GetData(url, con)) # 변경된 부분
             cf = PhotoImage(file = "comment_freq.png") # 변경된 부분
-            Label(Result, image = cf).pack() # 변경된 부분
+            label = Label(Result, image = cf) # 변경된 부분
+            label.image = cf # 변경된 부분
+            label.pack() # 변경된 부분
         elif self.name == '영상 제목 시각화':
-            z4= da.title_freq(dm.GetData(url, con))
-            print(type(z4))
+            da.title_freq(dm.GetData(url, con)) # 변경된 부분
             tf = PhotoImage(file = "title_freq.png") # 변경된 부분
-            Label(Result, image = tf).pack() # 변경된 부분
+            label = Label(Result, image = tf) # 변경된 부분
+            label.image = tf # 변경된 부분
+            label.pack() # 변경된 부분
 
 def InputPwIp(event):
     global con

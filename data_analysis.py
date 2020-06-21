@@ -25,6 +25,7 @@ import random
 from PIL import Image
 from tkinter import *
 
+
 def videos_corr(youtuber_csv_data):
     # youtuber_csv_data = dm.GetData(url, con) << main.py에서 구현
     youtuber_data = list(youtuber_csv_data)
@@ -85,7 +86,7 @@ def videos_corr(youtuber_csv_data):
 
         if '천' in video_info['unlike'].iloc[i]:
             aa = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i]))
-            if len(a) == 2:
+            if len(aa) == 2:
                 bb = aa + '00'
             else:
                 bb = aa + '000'
@@ -117,11 +118,14 @@ def videos_corr(youtuber_csv_data):
     video_info2['unlike'] = video_info2['unlike'].astype('float64')
     video_info2['comment'] = video_info2['comment'].astype('float64')
 
-    video_info2[['view', 'like', 'comment']].corr()
-    print(video_info2[['view', 'like', 'comment']].corr())  # 상관분석 표... 조회수 좋아요 댓글의 상관관계를 보여준다
+
     # 영상 길이는 실수 형태로 변경이 되지 않아 4x4로 표현 불가 13:24 이런 식이라서..
-    heat = video_info2[['view', 'like', 'comment']].corr()
-    sns.heatmap(heat, annot=True)  # 파이참으로는 안보입니다
+    heat = video_info2[['view', 'like', 'comment']].corr() # 상관분석 표... 조회수 좋아요 댓글의 상관관계를 보여준다
+    plt.figure(figsize=(4,4))
+    vc = sns.heatmap(heat, annot=True, linewidths=1)  # 파이참으로는 안보입니다
+    figure = vc.get_figure()
+    figure.savefig('video_corr.png')
+
 
 def title_sort(youtuber_csv_data):
     # youtuber_csv_data = dm.GetData(url, con) << main.py에서 구현
@@ -286,7 +290,7 @@ def comment_freq(youtube_data) :
                    height=400)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    wc.to_file("comment_freq.png") # 변경된 부분
+    wc.to_file('comment_freq.png') # 변경된 부분
 
 #제목 빈도수 wordcloud 출력
 def title_freq(youtuber_csv_data) :
@@ -330,4 +334,4 @@ def title_freq(youtuber_csv_data) :
                    height=400)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    wc.to_file("title_freq.png") # 변경된 부분
+    wc.to_file('title_freq.png') # 변경된 부분
