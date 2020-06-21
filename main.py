@@ -1,3 +1,6 @@
+# 작성자 : 박민우   조(팀명) : 11조 키보드
+# 범위 : 해당 파일 전체
+
 import data_management as dm
 import data_analysis as da
 from tkinter import *
@@ -109,8 +112,8 @@ class AnlsMethod :
         Result = Frame(frame_Result, width=0, height=0, bg='Orange')
         Result.pack()
         if self.name == '영상 별 상관관계':
-            da.videos_corr(dm.GetData(url, con))
-
+            z= da.videos_corr(dm.GetData(url, con))
+            print(type(z))
             Label(Result, text='영상 별 상관관계', width=0, height=0, bg='Yellow').pack() # 임시 결과물
         elif self.name == '영상 제목 정렬':
             da.title_sort(dm.GetData(url, con))

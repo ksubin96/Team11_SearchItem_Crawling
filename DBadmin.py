@@ -1,3 +1,6 @@
+# 작성자 : 박민우   조(팀명) : 11조 키보드
+# 범위 : 해당 파일 전체
+
 import data_management as dm
 
 con=None
