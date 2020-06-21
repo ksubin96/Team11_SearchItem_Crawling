@@ -22,7 +22,7 @@ import matplotlib as mpl
 import matplotlib.pylab as plt
 import numpy as np
 import random
-from PIL import Image
+
 from tkinter import *
 
 def videos_corr(youtuber_csv_data):
@@ -282,11 +282,14 @@ def comment_freq(youtube_data) :
     counts = Counter(noun_list)
     tags = counts.most_common(30)
 
-    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='white', width=400,
-                   height=400)
+    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='black', width=800,
+                   height=600)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    wc.to_file("comment_freq.png") # 변경된 부분
+    plt.figure(figsize=(10, 8))
+    plt.axis('off')
+    plt.imshow(cloud)
+    plt.show()
 
 #제목 빈도수 wordcloud 출력
 def title_freq(youtuber_csv_data) :
@@ -326,8 +329,11 @@ def title_freq(youtuber_csv_data) :
     counts = Counter(noun_list)
     tags = counts.most_common(30)
 
-    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='white', width=400,
-                   height=400)
+    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='white', width=800,
+                   height=600)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    wc.to_file("title_freq.png") # 변경된 부분
+    plt.figure(figsize=(10, 8))
+    plt.axis('off')
+    plt.imshow(cloud)
+    plt.show()
