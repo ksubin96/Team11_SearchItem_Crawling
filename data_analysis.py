@@ -1,3 +1,9 @@
+# 조(팀명) : 11조 키보드
+# 작성자 : 강형우
+# 범위 : 앞의 두 함수 : videos_corr, title_sort
+# 작성자 : 김수빈
+# 범위 : 뒤의 두 함수 : comment_freq, title_freq
+
 #하단의 주석문에서 시키는 대로 해야 프로그램이 동작합니다.
 
 # 관리자 명령프롬프트에 다음 명령어를 전부 입력
@@ -85,7 +91,7 @@ def videos_corr(youtuber_csv_data):
 
         if '천' in video_info['unlike'].iloc[i]:
             aa = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i]))
-            if len(a) == 2:
+            if len(aa) == 2:
                 bb = aa + '00'
             else:
                 bb = aa + '000'
@@ -122,6 +128,7 @@ def videos_corr(youtuber_csv_data):
     # 영상 길이는 실수 형태로 변경이 되지 않아 4x4로 표현 불가 13:24 이런 식이라서..
     heat = video_info2[['view', 'like', 'comment']].corr()
     sns.heatmap(heat, annot=True)  # 파이참으로는 안보입니다
+    return heat
 
 def title_sort(youtuber_csv_data):
     # youtuber_csv_data = dm.GetData(url, con) << main.py에서 구현
@@ -142,6 +149,8 @@ def title_sort(youtuber_csv_data):
         videolength.append(youtuber_data[i][5])
         comment.append(youtuber_data[i][6])
         date.append(youtuber_data[i][7])
+
+    # print(youtuber_data[0])  # 0행 출력
 
     video_info = pd.DataFrame({'title': [],
                                'view': [],
@@ -166,12 +175,45 @@ def title_sort(youtuber_csv_data):
     comment_ls = []
     date_ls = []
 
+    for i in range(len(video_info)):
+        if '천' in video_info['like'].iloc[i]:
+            a = ''.join(re.findall('[0-9]', video_info['like'].iloc[i]))
+            if len(a) == 2:
+                b = a + '00'
+            else:
+                b = a + '000'
+        elif '만' in video_info['like'].iloc[i]:
+            b = ''.join(re.findall('[0-9]', video_info['like'].iloc[i])) + '000'
+        else:
+            b = video_info['like'].iloc[i]
+        like_ls.append(b)
+
+        if '천' in video_info['unlike'].iloc[i]:
+            aa = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i]))
+            if len(a) == 2:
+                bb = aa + '00'
+            else:
+                bb = aa + '000'
+        elif '만' in video_info['unlike'].iloc[i]:
+            bb = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i])) + '000'
+        else:
+            bb = video_info['unlike'].iloc[i]
+        unlike_ls.append(bb)
+
+        view0 = ''.join(re.findall('[0-9]', video_info['view'].iloc[i]))
+        view_ls.append(view0)
+
+        comment0 = ''.join(re.findall('[0-9]', video_info['comment'].iloc[i]))
+        comment_ls.append(comment0)
+
+        date0 = ''.join(re.findall('[.0-9]', video_info['date'].iloc[i]))
+        date_ls.append(date0[:-1])
+
     video_info['like'] = like_ls
     video_info['view'] = view_ls
     video_info['comment'] = comment_ls
     video_info['date'] = date_ls
     video_info['unlike'] = unlike_ls
-
 
     # 이모티콘 제거
     emoji_pattern = re.compile("["
@@ -194,17 +236,18 @@ def title_sort(youtuber_csv_data):
 
     video_info['title'] = title_ls
 
-    twitter = Twitter()
-    #kkma = Kkma()
+    # twitter = Twitter()
+    kkma = Kkma()
 
     # 영상제목 토큰화 하는 과정
     noun_final = []
     for text in range(len(video_info)):
-        noun0 = twitter.pos(video_info['title'].iloc[text])
+        noun0 = kkma.pos(video_info['title'].iloc[text])
         noun = []
+
         for i, j in noun0:
             if j == 'NNG':
-                if i == '뽀' or i == '블리':
+                if i == '':
                     pass
                 else:
                     noun.append(i)
@@ -245,9 +288,9 @@ def comment_freq(youtube_data) :
     #     return None
     # video_num = int(input("몇 번 동영상을 분석할까요 ? "))
     # youtube_data = dm.GetData(youtuber_csv_data[video_num][0], password) >> main.py에서 구현
-    if youtube_data == None:
-        print("데이터 없음")
-        return None
+    # if youtube_data == None:
+    #     print("데이터 없음")
+    #     return None
     comment = []
     for i in range(len(youtube_data)):
         comment.append(youtube_data[i][2])
@@ -286,6 +329,7 @@ def comment_freq(youtube_data) :
                    height=600)
 
     cloud = wc.generate_from_frequencies(dict(tags))
+    return cloud
     plt.figure(figsize=(10, 8))
     plt.axis('off')
     plt.imshow(cloud)

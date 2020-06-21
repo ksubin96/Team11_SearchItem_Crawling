@@ -1,3 +1,9 @@
+# 조(팀명) : 11조 키보드
+# 작성자 : 박민우
+# 범위 : 해당 파일 전체
+# 작성자 : 김수빈
+# 범위 : anls(self,url)의 핵심 코드 작성
+
 import data_management as dm
 import data_analysis as da
 from tkinter import *
@@ -7,7 +13,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # 전역변수 선언
 #con = None
-con = dm.ConnectmainDB('11whzlqhem', '127.0.0.1')
+con = dm.ConnectmainDB( '127.0.0.1','11whzlqhem','root')
 SltObjects = []
 SltMethod = None
 ListObject = []
@@ -109,25 +115,19 @@ class AnlsMethod :
         Result = Frame(frame_Result, width=0, height=0, bg='Orange')
         Result.pack()
         if self.name == '영상 별 상관관계':
-            da.videos_corr(dm.GetData(url, con))
-
-            Label(Result, text='영상 별 상관관계', width=0, height=0, bg='Yellow').pack() # 임시 결과물
+            Label(Result, text=da.videos_corr(dm.GetData(url, con)), font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
         elif self.name == '영상 제목 정렬':
-            da.title_sort(dm.GetData(url, con))
-
-            Label(Result, text='영상 제목 정렬', width=0, height=0, bg='Yellow').pack() # 임시 결과물
+            Label(Result, text='영상 제목 정렬', font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
         elif self.name == '댓글 시각화':
-            da.comment_freq(dm.GetData(url, con))
-
-            Label(Result, text='댓글 시각화', width=0, height=0, bg='Yellow').pack() # 임시 결과물
+            cf = PhotoImage(file = "comment_freq.png") # 변경된 부분
+            Label(Result, image = cf).pack() # 변경된 부분
         elif self.name == '영상 제목 시각화':
-            da.title_freq(dm.GetData(url, con))
-
-            Label(Result, text='영상 제목 시각화', width=0, height=0, bg='Yellow').pack() # 임시 결과물
+            tf = PhotoImage(file = "title_freq.png") # 변경된 부분
+            Label(Result, image = tf).pack() # 변경된 부분
 
 def InputPwIp(event):
     global con
-    con = dm.ConnectmainDB(str_pw.get(), str_ip.get())
+    con = dm.ConnectmainDB(str_ip.get(), str_pw.get(), str_id.get())
     if con == None :
         Info2.pack_forget()
         Info1.pack(side=LEFT)
@@ -192,13 +192,17 @@ window.title('유튜버 정보 분석')
 window.geometry('900x500')
 window.resizable(width = FALSE, height = FALSE)
 
-# DB ip, password 입력란
+# DB ip, password, id 입력란
 frame_PwIp = Frame(window, height=2, bg='gray') # DB ip, password 입력란이 생성될 자리
 frame_PwIp.pack(side=TOP, fill=X)
 str_pw= StringVar()
+str_id= StringVar()
 str_ip= StringVar()
+
 Label(frame_PwIp, text =' DB ip :', width=7, bg='gray', fg='white').pack(side=LEFT)
 ttk.Entry(frame_PwIp, width=19, textvariable=str_ip).pack(side=LEFT)
+Label(frame_PwIp, text =' DB id :', width=7, bg='gray', fg='white').pack(side=LEFT)
+ttk.Entry(frame_PwIp, width=19, textvariable=str_id).pack(side=LEFT)
 Label(frame_PwIp, text=' DB password :', width=12, bg='gray', fg='white').pack(side=LEFT)
 ttk.Entry(frame_PwIp, width=19, textvariable=str_pw).pack(side=LEFT)
 Label(frame_PwIp, width=0, bg='gray').pack(side=LEFT)
@@ -222,7 +226,7 @@ frame_search = Frame(frame[1], bg='Orange') # 검색어 입력란이 생성될 �
 frame_search.pack(side=TOP)
 str_search= StringVar()
 ttk.Entry(frame_search, width=40, textvariable=str_search).pack(side=LEFT)
-search = Button(frame_search, text='검색', width=5, bg='Orange')
+search = Button(frame_search, text='검색', width=5, bg='Yellow')
 search.pack(side=LEFT)
 search.bind('<Button-1>',Search)
 
@@ -236,10 +240,10 @@ Info3=Label(SltObjectList, text='분석대상을 선택해주세요.', bg='Yello
 
 # 분석대상 목록
 Frame(frame[1], height=8, bg='Orange').pack(side=TOP) # 여백
-frame_ObjectList = Frame(frame[1], width=390, bg='Orange') # 분석대상 목록이 생성될 자리
+frame_ObjectList = Frame(frame[1], bg='Orange') # 분석대상 목록이 생성될 자리
 frame_ObjectList.pack(side=TOP)
 list_scroll = Frame(frame_ObjectList, bg='Orange')
-canvas_ObjectList = Canvas(list_scroll, width=370, height=364)
+canvas_ObjectList = Canvas(list_scroll, height=364, bg='Yellow')
 scrollbar_ObjectList = Scrollbar(list_scroll, orient='vertical',command=canvas_ObjectList.yview)
 Info4 = Label(frame_ObjectList, width=43, text='해당 유튜버가 존재하지 않습니다.', bg='Yellow',font=('맑은 고딕',12),fg='blue')
 Info5 = Label(frame_ObjectList, width=43, text='찾으시는 정보가 없습니다.', bg='Yellow',font=('맑은 고딕',12),fg='blue')
@@ -260,11 +264,3 @@ frame_Result = Frame(frame[3], bg='Orange') # 분석결과가 생성될 자리
 frame_Result.pack(side=TOP)
 
 window.mainloop()
-
-
-
-
-
-
-
-
