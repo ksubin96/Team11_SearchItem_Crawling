@@ -38,31 +38,47 @@ import pymysql
 
 
 # 사용 가능
-def GetYoutuberUrl(youtube_search) :# 검색어를 인자로 받아 유튜버url을 반환
-    browser = Chrome('./chromedriver')
+# 검색어를 인자로 받아 해당 검색어와 동일한 이름을 가지는 유튜버가 DB에 있다면 그 유튜버url을 반환. 없다면 해당,,
+def GetYoutuberUrl(youtube_search, con) :
+    cur = con.cursor()
+    cur.execute('SELECT * FROM youtubers')
+    list = cur.fetchall()
+    i = 0
     while True:
-        browser.implicitly_wait(10)  # 브라우저에서 파싱이 완료될 때까지 기다려줌.
-        browser.get('https://www.youtube.com')  # youtube로 이동
-        Search_html = BeautifulSoup(browser.page_source, 'html.parser')
-        link1 = Search_html.find('a', {'class': 'yt-simple-endpoint style-scope yt-formatted-string'})['href'][1:]
-        browser.find_elements_by_name("search_query")[0].send_keys(youtube_search + '\n')  # 검색창 영역에 검색어 + 엔터
-        Search_html = BeautifulSoup(browser.page_source, 'html.parser')
         try:
-            link2 = Search_html.find('a', {'class': 'yt-simple-endpoint style-scope yt-formatted-string'})['href'][1:]
-            if link1 == link2:
-                browser = Chrome('./chromedriver')
-                time.sleep(1)
-                continue
-            return link2
+            if list[i][1] == youtube_search:
+                return list[i][0]
         except:
-            return None
+            break
+        i += 1
+    co=Options()
+    co.add_argument('headless')
+    browser = Chrome('./chromedriver',chrome_options=co)
+    browser.implicitly_wait(10)  # 브라우저에서 파싱이 완료될 때까지 기다려줌.
+    browser.get('https://www.youtube.com/results?search_query='+youtube_search)  # youtube로 이동
+    Search_html = BeautifulSoup(browser.page_source, 'html.parser')
+    browser.close()
+    try:
+        return Search_html.find('a', {'class': 'yt-simple-endpoint style-scope yt-formatted-string'})['href'][1:]
+    except:
+        return None
 
+# 사용 가능
+# 주어진 ip pw로 youtuberDB에 접속한다.
+def ConnectmainDB(pw, ip) :
+    try : return pymysql.connect(ip, user='root', password=pw, database='youtuberDB', charset='utf8mb4')
+    except : return None
+
+# 사용 가능
+# admin 용 : 주어진 pw로 본인의 DB에 접속한다.
+def ConnectDB(pw) :
+    try : return pymysql.connect(host='127.0.0.1', user='root', password=pw)
+    except : return None
 
 # 사용 가능
 # url에 해당하는 table의 값들을 csv파일의 형태으로 반환
-def GetData(url, pw, ip='127.0.0.1') : # ip 입력안하면 본인 컴퓨터를 가리키는 ip로 지정
+def GetData(url, con) :
     try:
-        con = pymysql.connect(ip, user='root', password=pw, database='youtuberDB', charset='utf8mb4')
         cur = con.cursor()
         if 'user/' in url or 'channel/' in url:
             cur.execute('SELECT * FROM videos_' + re.sub(r'[^\w]', r'_', url))
@@ -72,17 +88,25 @@ def GetData(url, pw, ip='127.0.0.1') : # ip 입력안하면 본인 컴퓨터를 
     except : return None
 
 # 사용 가능
-def YoutuberCheck(youtuber_url, pw, ip='127.0.0.1'): # ip 입력안하면 본인 컴퓨터를 가리키는 ip로 지정
-    con = pymysql.connect(ip, user='root', password=pw, database='youtuberDB', charset='utf8mb4')
+# 주어진 url에 해당하는 유튜버의 이름을 반환 없으면 none 반환
+def GetYoutuberName(youtuber_url, con):
     cur = con.cursor()
-    cur.execute("SHOW TABLES LIKE 'videos_"+re.sub(r'[^\w]',r'_',youtuber_url)+"'")
-    return len(cur.fetchall())
+    cur.execute('SELECT * FROM youtubers')
+    list = cur.fetchall()
+    i = 0
+    while True:
+        try:
+            if list[i][0] == youtuber_url:
+                return list[i][1]
+        except:
+            return None
+        i += 1
+
 
 # 사용 가능
-# 일부러 시간이 조금만 걸리고 데이터를 조금만 수집하도록 해뒀음. 나중에 실제 프로그램을 쓸 때는 데이터를 싹다 수집하도록 할 것임.
-def CrawlAndSave(youtuber_url, pw, ip='127.0.0.1') : # ip 입력안하면 본인 컴퓨터를 가리키는 ip로 지정
+def CrawlAndSave(youtuber_url, con) :
     VideoList_pagedown = 0
-    Video_pagedown = 1
+    Video_pagedown = 5
 
     # 검색한 유튜버의 영상 목록 page로 이동
     browser = Chrome('./chromedriver')
@@ -90,7 +114,6 @@ def CrawlAndSave(youtuber_url, pw, ip='127.0.0.1') : # ip 입력안하면 본인
     browser.get('https://www.youtube.com/'+youtuber_url+'/videos')  # youtuber의 동영상 카테고리으로 이동
 
     # 유튜버 이름과 유튜버 url 수집
-    con = pymysql.connect(ip, user='root', password=pw, database='youtuberDB', charset='utf8mb4')
     cur = con.cursor()
     youtuber_html = BeautifulSoup(browser.page_source, 'html.parser')
     youtuber_name=youtuber_html.find('yt-formatted-string', {'class': 'style-scope ytd-channel-name'}).text.replace('\'', '').replace('\"', '')
@@ -193,11 +216,12 @@ def CrawlAndSave(youtuber_url, pw, ip='127.0.0.1') : # ip 입력안하면 본인
 
                 # 댓글 데이터를 DB에 저장
                 cur.execute("INSERT INTO comments_" + re.sub(r'[^\w]', r'_', video_url) + " VALUES('" + comment_youtube_id + "','" + comment_like_num + "','" + comment_comment + "')")
+    browser.close()
     con.commit()
     con.close()
 
 # 사용가능
-# youtuberDB생성
+# 본인 컴퓨터에 youtuberDB생성
 def newDB(pw):
     con = pymysql.connect(host='127.0.0.1', user='root', password=pw)
     cur = con.cursor()
@@ -209,7 +233,7 @@ def newDB(pw):
     except : None
 
 # 사용가능
-# youtuberDB제거
+# 본인 컴퓨터에서 youtuberDB제거
 def delDB(pw):
     con = pymysql.connect(host='127.0.0.1', user='root', password=pw)
     cur = con.cursor()
@@ -230,11 +254,7 @@ def PrintTable(pw, ip='127.0.0.1') :
     cur.execute("SHOW TABLES")
     print(cur.fetchall())
 
-# 사용 불가
-# 이 함수의 용도 : 서버 관리자가 서버 호스트 db의 데이터를 업데이트해주는 데에 사용
-# 이 함수는 없어도 딱히 상관없다.
-def GetUpdateData() :
-    return None
+
 
 
 
@@ -409,3 +429,4 @@ def testDB2() :
     con.close()
 # testDB2()
 
+#browser.find_elements_by_name("search_query")[0].send_keys(youtube_search + '\n')  # 검색창 영역에 검색어 + 엔터
