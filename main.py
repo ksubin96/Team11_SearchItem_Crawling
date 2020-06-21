@@ -120,11 +120,13 @@ class AnlsMethod :
         elif self.name == '댓글 시각화':
             z3= da.comment_freq(dm.GetData(url, con))
             print(type(z3))
-            Label(Result, text='댓글 시각화', font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
+            cf = PhotoImage(file = "comment_freq.png") # 변경된 부분
+            Label(Result, image = cf).pack() # 변경된 부분
         elif self.name == '영상 제목 시각화':
             z4= da.title_freq(dm.GetData(url, con))
             print(type(z4))
-            Label(Result, text='영상 제목 시각화', font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
+            tf = PhotoImage(file = "title_freq.png") # 변경된 부분
+            Label(Result, image = tf).pack() # 변경된 부분
 
 def InputPwIp(event):
     global con
@@ -261,11 +263,3 @@ frame_Result = Frame(frame[3], bg='Orange') # 분석결과가 생성될 자리
 frame_Result.pack(side=TOP)
 
 window.mainloop()
-
-
-
-
-
-
-
-

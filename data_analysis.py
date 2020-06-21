@@ -1,9 +1,3 @@
-# 작성자 : 강형우   조(팀명) : 11조 키보드
-# 범위 : 앞의 두 함수 : videos_corr, title_sort
-
-# 작성자 : 김수빈   조(팀명) : 11조 키보드
-# 범위 : 뒤의 두 함수 : comment_freq, title_freq
-
 #하단의 주석문에서 시키는 대로 해야 프로그램이 동작합니다.
 
 # 관리자 명령프롬프트에 다음 명령어를 전부 입력
@@ -28,7 +22,7 @@ import matplotlib as mpl
 import matplotlib.pylab as plt
 import numpy as np
 import random
-
+from PIL import Image
 from tkinter import *
 
 def videos_corr(youtuber_csv_data):
@@ -127,7 +121,7 @@ def videos_corr(youtuber_csv_data):
     print(video_info2[['view', 'like', 'comment']].corr())  # 상관분석 표... 조회수 좋아요 댓글의 상관관계를 보여준다
     # 영상 길이는 실수 형태로 변경이 되지 않아 4x4로 표현 불가 13:24 이런 식이라서..
     heat = video_info2[['view', 'like', 'comment']].corr()
-    return sns.heatmap(heat, annot=True)  # 파이참으로는 안보입니다
+    sns.heatmap(heat, annot=True)  # 파이참으로는 안보입니다
 
 def title_sort(youtuber_csv_data):
     # youtuber_csv_data = dm.GetData(url, con) << main.py에서 구현
@@ -148,8 +142,6 @@ def title_sort(youtuber_csv_data):
         videolength.append(youtuber_data[i][5])
         comment.append(youtuber_data[i][6])
         date.append(youtuber_data[i][7])
-
-    # print(youtuber_data[0])  # 0행 출력
 
     video_info = pd.DataFrame({'title': [],
                                'view': [],
@@ -174,45 +166,12 @@ def title_sort(youtuber_csv_data):
     comment_ls = []
     date_ls = []
 
-    for i in range(len(video_info)):
-        if '천' in video_info['like'].iloc[i]:
-            a = ''.join(re.findall('[0-9]', video_info['like'].iloc[i]))
-            if len(a) == 2:
-                b = a + '00'
-            else:
-                b = a + '000'
-        elif '만' in video_info['like'].iloc[i]:
-            b = ''.join(re.findall('[0-9]', video_info['like'].iloc[i])) + '000'
-        else:
-            b = video_info['like'].iloc[i]
-        like_ls.append(b)
-
-        if '천' in video_info['unlike'].iloc[i]:
-            aa = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i]))
-            if len(a) == 2:
-                bb = aa + '00'
-            else:
-                bb = aa + '000'
-        elif '만' in video_info['unlike'].iloc[i]:
-            bb = ''.join(re.findall('[0-9]', video_info['unlike'].iloc[i])) + '000'
-        else:
-            bb = video_info['unlike'].iloc[i]
-        unlike_ls.append(bb)
-
-        view0 = ''.join(re.findall('[0-9]', video_info['view'].iloc[i]))
-        view_ls.append(view0)
-
-        comment0 = ''.join(re.findall('[0-9]', video_info['comment'].iloc[i]))
-        comment_ls.append(comment0)
-
-        date0 = ''.join(re.findall('[.0-9]', video_info['date'].iloc[i]))
-        date_ls.append(date0[:-1])
-
     video_info['like'] = like_ls
     video_info['view'] = view_ls
     video_info['comment'] = comment_ls
     video_info['date'] = date_ls
     video_info['unlike'] = unlike_ls
+
 
     # 이모티콘 제거
     emoji_pattern = re.compile("["
@@ -235,18 +194,17 @@ def title_sort(youtuber_csv_data):
 
     video_info['title'] = title_ls
 
-    # twitter = Twitter()
-    kkma = Kkma()
+    twitter = Twitter()
+    #kkma = Kkma()
 
     # 영상제목 토큰화 하는 과정
     noun_final = []
     for text in range(len(video_info)):
-        noun0 = kkma.pos(video_info['title'].iloc[text])
+        noun0 = twitter.pos(video_info['title'].iloc[text])
         noun = []
-
         for i, j in noun0:
             if j == 'NNG':
-                if i == '':
+                if i == '뽀' or i == '블리':
                     pass
                 else:
                     noun.append(i)
@@ -324,14 +282,11 @@ def comment_freq(youtube_data) :
     counts = Counter(noun_list)
     tags = counts.most_common(30)
 
-    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='black', width=800,
-                   height=600)
+    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='white', width=400,
+                   height=400)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    plt.figure(figsize=(10, 8))
-    plt.axis('off')
-    plt.imshow(cloud)
-    plt.show()
+    wc.to_file("comment_freq.png") # 변경된 부분
 
 #제목 빈도수 wordcloud 출력
 def title_freq(youtuber_csv_data) :
@@ -371,11 +326,8 @@ def title_freq(youtuber_csv_data) :
     counts = Counter(noun_list)
     tags = counts.most_common(30)
 
-    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='white', width=800,
-                   height=600)
+    wc = WordCloud(font_path='C:\\Windows\\Fonts\\gulim.ttc', background_color='white', width=400,
+                   height=400)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    plt.figure(figsize=(10, 8))
-    plt.axis('off')
-    plt.imshow(cloud)
-    plt.show()
+    wc.to_file("title_freq.png") # 변경된 부분
