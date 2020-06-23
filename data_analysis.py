@@ -288,9 +288,8 @@ def comment_freq(youtube_data) :
     #     return None
     # video_num = int(input("몇 번 동영상을 분석할까요 ? "))
     # youtube_data = dm.GetData(youtuber_csv_data[video_num][0], password) >> main.py에서 구현
-    # if youtube_data == None:
-    #     print("데이터 없음")
-    #     return None
+    if youtube_data == None:
+         return None
     comment = []
     for i in range(len(youtube_data)):
         comment.append(youtube_data[i][2])
@@ -329,7 +328,7 @@ def comment_freq(youtube_data) :
                    height=600)
 
     cloud = wc.generate_from_frequencies(dict(tags))
-    return cloud
+    cloud
     plt.figure(figsize=(10, 8))
     plt.axis('off')
     plt.imshow(cloud)
@@ -339,7 +338,6 @@ def comment_freq(youtube_data) :
 def title_freq(youtuber_csv_data) :
     # youtuber_csv_data = dm.GetData(url, con) << main.py에서 구현
     if youtuber_csv_data == None:
-        print("데이터 없음")
         return None
     title = []
     for i in range(len(youtuber_csv_data)):

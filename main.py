@@ -12,8 +12,7 @@ from tkinter.simpledialog import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # 전역변수 선언
-#con = None
-con = dm.ConnectmainDB( '127.0.0.1','11whzlqhem','root')
+con = None
 SltObjects = []
 SltMethod = None
 ListObject = []
@@ -115,15 +114,15 @@ class AnlsMethod :
         Result = Frame(frame_Result, width=0, height=0, bg='Orange')
         Result.pack()
         if self.name == '영상 별 상관관계':
-            Label(Result, text=da.videos_corr(dm.GetData(url, con)), font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
+            Label(Result, text=da.videos_corr(dm.GetData(url, con)), font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack()
         elif self.name == '영상 제목 정렬':
-            Label(Result, text='영상 제목 정렬', font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack() # 임시 결과물
+            Label(Result, text='영상 제목 정렬', font=('나눔고딕 ExtraBold',14), fg='#803030' ,bg='#90FFFF').pack()
         elif self.name == '댓글 시각화':
-            cf = PhotoImage(file = "comment_freq.png") # 변경된 부분
-            Label(Result, image = cf).pack() # 변경된 부분
+            cf = PhotoImage(file = "comment_freq.png")
+            Label(Result, image = cf).pack()
         elif self.name == '영상 제목 시각화':
-            tf = PhotoImage(file = "title_freq.png") # 변경된 부분
-            Label(Result, image = tf).pack() # 변경된 부분
+            tf = PhotoImage(file = "title_freq.png")
+            Label(Result, image = tf).pack()
 
 def InputPwIp(event):
     global con
@@ -192,8 +191,8 @@ window.title('유튜버 정보 분석')
 window.geometry('900x500')
 window.resizable(width = FALSE, height = FALSE)
 
-# DB ip, password, id 입력란
-frame_PwIp = Frame(window, height=2, bg='gray') # DB ip, password 입력란이 생성될 자리
+# DB ip, id, password 입력란
+frame_PwIp = Frame(window, height=2, bg='gray') # DB ip, id, password 입력란이 생성될 자리
 frame_PwIp.pack(side=TOP, fill=X)
 str_pw= StringVar()
 str_id= StringVar()
